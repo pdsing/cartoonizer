@@ -5,6 +5,9 @@ import numpy as np
 from collections import defaultdict
 from scipy import stats
 import cv2
+import glob
+from os import listdir
+from os.path import isfile, join
 
 
 def cartoonize(image):
@@ -130,6 +133,23 @@ def k_histogram(hist):
             C = np.array(sorted(new_C))
     return C
 
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('input', help='input image')
+#     parser.add_argument('output', help='output cartoonized image')
+
+#     args = parser.parse_args()
+
+#     # image = Image.open(args.input)
+#     image = cv2.imread(args.input)
+#     start_time = time.time()
+#     output = cartoonize(image)
+#     end_time = time.time()
+#     t = end_time-start_time
+#     print('time: {0}s'.format(t))
+#     cv2.imwrite(args.output, output)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input', help='input image')
@@ -138,10 +158,22 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # image = Image.open(args.input)
-    image = cv2.imread(args.input)
-    start_time = time.time()
-    output = cartoonize(image)
-    end_time = time.time()
-    t = end_time-start_time
-    print('time: {0}s'.format(t))
-    cv2.imwrite(args.output, output)
+    input_image_folder = args.input
+    output_image_folder = args.output
+
+    input_images = [join(input_image_folder, f) for f in listdir(input_image_folder) if isfile(join(input_image_folder, f))]
+    input_images_names = [f for f in listdir(input_image_folder) if isfile(join(input_image_folder, f))]
+
+    # print(input_images)
+    # print(input_images_names)
+
+
+    for (input_image, image_name) in zip(input_images, input_images_names):
+        image = cv2.imread(input_image)
+        start_time = time.time()
+        output = cartoonize(image)
+        end_time = time.time()
+        t = end_time-start_time
+        print('time: {0}s'.format(t))
+        output_image_name = join(output_image_folder, image_name)
+        cv2.imwrite(output_image_name, output)
