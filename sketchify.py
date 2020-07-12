@@ -25,6 +25,4 @@ i = 255-g
 b = scipy.ndimage.filters.gaussian_filter(i,sigma=10)
 r= dodge(b,g)
 
-# plt.imshow(r, cmap="gray")
-
 plt.imsave('img42.png', r, cmap='gray', vmin=0, vmax=255)

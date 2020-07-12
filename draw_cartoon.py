@@ -8,8 +8,13 @@ import cv2
 import glob
 from os import listdir
 from os.path import isfile, join
+import os
+# for sketchify
+import matplotlib.pyplot as plt
+import scipy.ndimage
 
 
+# The main cartoon function running on BizNewz
 def cartoonize(image):
     """
     convert image into cartoon-like image
@@ -54,7 +59,7 @@ def cartoonize(image):
     cv2.drawContours(output, contours, -1, 0, thickness=1)
     return output
 
-
+# Helper functions for Cartoonize
 def update_C(C, hist):
     """
     update centroids until they don't change
@@ -127,6 +132,28 @@ def k_histogram(hist):
     return C
 
 
+# Helper functions for creating the basic black and white sketch
+def grayscale(rgb):
+    return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
+
+
+def dodge(front,back):
+    result=front*255/(255-back) 
+    result[result>255]=255
+    result[back==255]=255
+    return result.astype('uint8')
+
+# The simple sketchify
+def sketchify(image):
+    g=grayscale(image)
+    i = 255-g
+    b = scipy.ndimage.filters.gaussian_filter(i,sigma=10)
+    r= dodge(b,g)
+    return r
+
+
+
+# The main function
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', "--type", help="file to process single file, folder to process a full folder")
@@ -138,14 +165,20 @@ if __name__ == '__main__':
     if args.type == "file":
         input_image = args.input
         output_image = args.output
+        output_filename, output_file_extension = os.path.splitext(output_image)
         print(f"The files are {input_image} and {output_image}")
         image = cv2.imread(args.input)
         start_time = time.time()
+        # Calling the main cartoonizer
         output = cartoonize(image)
         end_time = time.time()
         t = end_time-start_time
         print('time: {0}s'.format(t))
-        cv2.imwrite(args.output, output)
+        cv2.imwrite(output_filename + "-1" + output_file_extension, output)
+
+        # Calling the simple black and white sketchify
+        r = sketchify(image)
+        plt.imsave(output_filename + "-2" + output_file_extension, r, cmap='gray', vmin=0, vmax=255)
 
     if args.type == "folder":
         input_image_folder = args.input
