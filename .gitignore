@@ -56,4 +56,8 @@ docs/_build/
 imgs/
 *.png
 *.jpeg
+*.wav
+*.mp3
 
+# Editor variables
+.vscode/
